@@ -1,0 +1,9 @@
+# Python/Pycharm
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+.idea
+
+# misc
+.swp
