@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt     # visual plotting of data
 import seaborn as sns               # visual plotting of data
 
 
-def barplot(gflops: [float], average: float, plot_title: str):
+def barplot(gflops: [float], average: float, plot_title: str, img_title: str):
     sns.set(style='ticks')
     x = arange(len(gflops))
 
@@ -28,6 +28,10 @@ def barplot(gflops: [float], average: float, plot_title: str):
 
     ax.set(xlabel='Trial', ylabel='GFlops', title=plot_title, ylim=(0.0, 3.5))
     plt.show()
+
+    img = './img/' + img_title
+    plt.savefig(img)
+
 
 def parse_results(logfile: str) -> float:
     """
@@ -59,8 +63,7 @@ def parse_results(logfile: str) -> float:
     return gflops, average
 
 
-# TODO: add back in: child: pexpect.spawn
-def benchmark_test(logfile: str, child, total_equations: int, leading_dimension: int, trials: int, alignment_value: int):
+def benchmark_test(logfile: str, child: pexpect.spawnu, total_equations: int, leading_dimension: int, trials: int, alignment_value: int):
     """
     Set the parameters for Linpack and store the resulting benchmarked measurements into a file
     :param logfile: the file for storing results
@@ -70,7 +73,7 @@ def benchmark_test(logfile: str, child, total_equations: int, leading_dimension:
     :param trials: the number of times the benchmark will be run
     :param alignment_value: is the memory alignment value (in kB)
     """
-    fileout = open(filename, 'w')
+    fileout = open(logfile, 'w')
 
     child.logfile = fileout
     child.expect(':')
@@ -131,11 +134,9 @@ if __name__ == '__main__':
     trials = '5'
     alignment_value = '64'
 
-    # TODO: Turn other functions back on
-    """
     build_image(img)
     run_docker(logfile, img, container_name)
-    """
     gflops, average = parse_results(logfile)
     plot_title = 'Experiment 1'
-    barplot(gflops, average, plot_title)
+    img_title = 'test1'
+    barplot(gflops, average, plot_title, img_title)
