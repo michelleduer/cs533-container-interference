@@ -7,7 +7,27 @@ container interference across various experiments
 """
 
 from subprocess import PIPE, Popen  # spawn processes with CLI commands
-import pexpect  # spawn, correspond with child processes
+import pexpect                      # spawn, correspond with child processes
+from numpy import float32, arange, mean as navg, asarray as narr  # quickly manipulate array types/statistics
+from statistics import mean         # mean function
+import matplotlib.pyplot as plt     # visual plotting of data
+import seaborn as sns               # visual plotting of data
+
+
+def barplot(gflops: [float], average: float, plot_title: str):
+    sns.set(style='ticks')
+    x = arange(len(gflops))
+
+    # color palettes
+
+    # proof of concept TODO: pick a palette
+    ax = sns.barplot(x, gflops)
+    palette_husl = sns.dark_palette((250, 85, 55), input="husl")
+    palette_ch = sns.color_palette("cubehelix", 8)
+    #ax = sns.barplot(x, gflops, palette=palette_husl)
+
+    ax.set(xlabel='Trial', ylabel='GFlops', title=plot_title, ylim=(0.0, 3.5))
+    plt.show()
 
 def parse_results(logfile: str) -> float:
     """
@@ -17,7 +37,7 @@ def parse_results(logfile: str) -> float:
     """
     start = 30  # Line starting measurement table values (this line remains constant)
     results = []
-    gflops = []
+    gflops_str = []
 
     # Reduce the logfile data to the benchmark measurements
     with open(logfile, 'r') as f:
@@ -30,9 +50,13 @@ def parse_results(logfile: str) -> float:
 
     # Reduce the benchmark measurements to the gflop values
     for meas in results[:-1]:
-        gflops.append(meas[5])
+        gflops_str.append(meas[5])
 
-    return gflops
+    # Calculate average
+    gflops = narr(gflops_str, dtype=float32)
+    average = navg(gflops)
+
+    return gflops, average
 
 
 # TODO: add back in: child: pexpect.spawn
@@ -112,4 +136,6 @@ if __name__ == '__main__':
     build_image(img)
     run_docker(logfile, img, container_name)
     """
-    gflops = parse_results(logfile)
+    gflops, average = parse_results(logfile)
+    plot_title = 'Experiment 1'
+    barplot(gflops, average, plot_title)
