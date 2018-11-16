@@ -2,9 +2,9 @@
 Include/
 Lib/
 Scripts/
+pip-selfcheck.json
 pyvenv.cfg
 .idea
 
 # misc
 .swp
-.notes
