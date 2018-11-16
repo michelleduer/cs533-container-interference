@@ -1,0 +1,46 @@
+Input data or print help ? Type [data]/help :^M
+
+^M
+Number of equations to solve (problem size): 100
+100^M
+Leading dimension of array: 100
+100^M
+Number of trials to run: 5
+5^M
+Data alignment value (in Kbytes): 64
+64^M
+Current date/time: Fri Nov 16 08:18:07 2018^M
+^M
+CPU frequency:    1.522 GHz^M
+Number of CPUs: 1^M
+Number of cores: 4^M
+Number of threads: 4^M
+^M
+Parameters are set to:^M
+^M
+Number of tests: 1^M
+Number of equations to solve (problem size) : 100  ^M
+Leading dimension of array                  : 100  ^M
+Number of trials to run                     : 5    ^M
+Data alignment value (in Kbytes)            : 64   ^M
+^M
+Maximum memory requested that can be used=147536, at the size=100^M
+^M
+=================== Timing linear equation system solver ===================^M
+^M
+Size   LDA    Align. Time(s)    GFlops   Residual     Residual(norm) Check^M
+100    100    64     0.000      1.5790   1.987993e-14 6.386110e-02   pass^M
+100    100    64     0.000      2.3059   1.987993e-14 6.386110e-02   pass^M
+100    100    64     0.000      2.9092   1.987993e-14 6.386110e-02   pass^M
+100    100    64     0.000      2.7800   1.987993e-14 6.386110e-02   pass^M
+100    100    64     0.000      2.8375   1.987993e-14 6.386110e-02   pass^M
+^M
+Performance Summary (GFlops)^M
+^M
+Size   LDA    Align.  Average  Maximal^M
+100    100    64      2.4823   2.9092  ^M
+^M
+Residual checks PASSED^M
+^M
+End of tests^M
+^M
