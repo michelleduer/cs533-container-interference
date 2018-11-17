@@ -14,18 +14,16 @@ import matplotlib.pyplot as plt     # visual plotting of data
 import seaborn as sns               # visual plotting of data
 
 
-def barplot(gflops: [float], average: float, plot_title: str, img_title: str):
+def barplot(averages: [float], plot_title: str, img_title: str):
+    """
+    Graph barplot from resulting benchmarking measuremnt(s)
+    :param average: average value resulting from benchmarking GFlops
+    :param plot_title: title of plot
+    :param img_title: title of saved file
+    """
     sns.set(style='ticks')
-    x = arange(len(gflops))
-
-    # color palettes
-
-    # proof of concept TODO: pick a palette
+    x = arange(len(averages))
     ax = sns.barplot(x, gflops)
-    palette_husl = sns.dark_palette((250, 85, 55), input="husl")
-    palette_ch = sns.color_palette("cubehelix", 8)
-    #ax = sns.barplot(x, gflops, palette=palette_husl)
-
     ax.set(xlabel='Trial', ylabel='GFlops', title=plot_title, ylim=(0.0, 3.5))
     plt.show()
 
@@ -128,6 +126,7 @@ if __name__ == '__main__':
     img = 'manta/linpack_img'
     container_name = 'test_container'
     logfile = 'results.log'
+    averages = []
 
     total_equations = '100'
     leading_dimension = '100'
@@ -136,7 +135,7 @@ if __name__ == '__main__':
 
     build_image(img)
     run_docker(logfile, img, container_name)
-    gflops, average = parse_results(logfile)
+    averages.append(parse_results(logfile))
     plot_title = 'Experiment 1'
     img_title = 'test1'
-    barplot(gflops, average, plot_title, img_title)
+    barplot(averages, plot_title, img_title)
