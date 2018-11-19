@@ -1,0 +1,2 @@
+./wrk -d 60s http://192.168.1.135:81/fedora29.iso > rawlogs/test3big.log
+
