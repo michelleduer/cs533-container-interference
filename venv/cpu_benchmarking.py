@@ -8,21 +8,22 @@ container interference across various experiments
 
 from subprocess import PIPE, Popen  # spawn processes with CLI commands
 import pexpect                      # spawn and correspond with child processes
-from numpy import arange            # quickly manipulate array types/statistics
 import matplotlib.pyplot as plt     # visual plotting of data
 import seaborn as sns               # visual plotting of data
 from threading import Thread as tr  # threading
 # resource: https://www.quantstart.com/articles/Parallelising-Python-with-Threading-and-Multiprocessing
 from os import listdir              # work with file directory
-
+from pandas import DataFrame as df  # use dataframes for plotting
 
 def parse_tests():
-    # Parse and graph baseline, single and multi tests
+    """
+    Parse and graph baseline, single and multi tests
+    """
     baseline_gflops = []
     single_gflops = []
     multi_gflops = []
 
-    files = listdir('./logs/')
+    files = sorted(listdir('./logs/'))
     for f in files:
         gflop = float(parse_file(f))
         if gflop > 0:
@@ -33,9 +34,13 @@ def parse_tests():
             elif 'multi' in f:
                 multi_gflops.append(gflop)
 
-    barplot(baseline_gflops, len(baseline_gflops), plot_title='Baseline Tests', img_title='baseline_tests')
-    barplot(single_gflops, len(single_gflops), plot_title='Single Core Tests', img_title='single_tests')
-    barplot(multi_gflops, len(multi_gflops), plot_title='Multi-Core Tests', img_title='multi_tests')
+    # Plot barplots
+    baseline_legend = ['cL/cL res', 'cL unr', 'nL', 'cL</cL res']
+    single_legend = ['']
+    multi_legend = ['']
+    barplot(baseline_gflops, len(baseline_gflops), baseline_legend, plot_title='Baseline Tests', img_title='baseline_tests')
+    barplot(single_gflops, len(single_gflops), single_legend, plot_title='Single Core Tests', img_title='single_tests')
+    barplot(multi_gflops, len(multi_gflops), multi_legend, plot_title='Multi-Core Tests', img_title='multi_tests')
 
 
 def single_tests(img: str, stress_img: str, total_tests: int, test_name: str, threads: int=2):
@@ -58,6 +63,7 @@ def single_tests(img: str, stress_img: str, total_tests: int, test_name: str, th
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './logs/' + name + '.log'
                 if i == 0:
+                    name = test_name + str(b + 1) + '-' + str(i + 1)
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=4, start=0))
                 else:
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=4, start=0))
@@ -81,10 +87,10 @@ def single_tests(img: str, stress_img: str, total_tests: int, test_name: str, th
                 logfile = './logs/' + name + '.log'
                 if i == 0:
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=0))
+                    names.append(name)
                 elif i == 1:
                     thread = tr(target=run_docker(logfile, stress_img, name, False, total_pinned_cpu=2, start=0, stress=True))
                 jobs.append(thread)
-                names.append(name)
         else:
             print(f'{str(b + 1)}: single container (2-cpu): Linpack, stress')
             for i in range(threads):
@@ -92,10 +98,10 @@ def single_tests(img: str, stress_img: str, total_tests: int, test_name: str, th
                 logfile = './logs/' + name + '.log'
                 if i == 0:
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=0))
+                    names.append(name)
                 elif i == 1:
                     thread = tr(target=run_docker(logfile, stress_img, name, False, total_pinned_cpu=2, start=0, stress=True))
                 jobs.append(thread)
-                names.append(name)
 
         for j in jobs:
             j.start()
@@ -148,8 +154,8 @@ def multi_tests(img: str, stress_img: str, total_tests: int, test_name: str, thr
                     thread = tr(target=run_docker(logfile, img, name, False))
                 elif i == 1:
                     thread = tr(target=run_docker(logfile, stress_img, name, False, total_pinned_cpu=0, start=0, stress=True))
-                jobs.append(thread)
                 names.append(name)
+                jobs.append(thread)
         elif b == 3:
             print(f'{str(b + 1)}: two container (2-cpu): Linpack, stress (testing 2-cpu)')
             for i in range(threads):
@@ -264,11 +270,12 @@ def baseline_tests(img: str, total_tests: int, test_name: str):
     return names
 
 
-def barplot(gflops: [float], total_tests: int, plot_title: str, img_title: str):
+def barplot(gflops: [float], total_tests: int, legend: [str], plot_title: str, img_title: str):
     """
     Graph barplot from resulting benchmarking measuremnt(s)
     :param gflops: average value resulting from benchmarking GFlops
     :param total_tests: total number of tests
+    :param legend: legend values
     :param plot_title: title of plot
     :param img_title: title of saved file
     """
@@ -285,9 +292,20 @@ def barplot(gflops: [float], total_tests: int, plot_title: str, img_title: str):
     ax = sns.barplot(test_count, gflops)
     #ax.set(xlabel='Experiments', ylabel='Average GFlops per 50 Trials', title=plot_title, ylim=(0.0, 3.5)) # TODO use y-lim?
     ax.set(xlabel='Experiments', ylabel='Average GFlops per 50 Trials', title=plot_title)
+
+    # Set legend outside of plot (specfically below)
+    # resource: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot/4701285#4701285
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+
+    # Put a legend below current axis
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=5)
+
+    # Save plot image
     img = './img/' + img_title
     plt.savefig(img)
 
+    # Display plot
     plt.show()
 
 
@@ -388,7 +406,7 @@ def run_docker(logfile: str, img: str, container_name: str, pin: bool=False, tot
 
     if stress:
         pexpect.spawnu(cmd)
-        """
+        """ TODO: try with closing  
         fileout = open(logfile, 'w')
         child.logfile = fileout
         child.expect(pexpect.EOF)
