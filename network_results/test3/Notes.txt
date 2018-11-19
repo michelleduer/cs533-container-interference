@@ -1,0 +1,3 @@
+I found these results were quite consistent across runs, though I cannot say for sure why test3big didn't reach 930 Mbps. 
+
+Update: Ryan frequently sees about 110 MB/sec as the cap in large file transfers on GbE. Since iperf3 uses huge frames, it appears we're basically at the limit of TCP on GbE without huge frames.

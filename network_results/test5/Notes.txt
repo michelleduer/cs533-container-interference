@@ -1,0 +1,3 @@
+This test is going to check whether test4 improves when the different nginx instances are pinned to different cores, with each getting 2 cores.
+
+Result: while test4 pretty much capped out the network capacity, test5 with pinned CPUs does reduce latency significantly for small file transfers. However, in neither case is the small file transfer server starved.

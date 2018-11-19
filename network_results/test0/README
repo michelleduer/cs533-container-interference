@@ -1,0 +1,21 @@
+The raw logs from iperf3 for the Docker vs. Bare Metal spreadsheet are stored in the subfolders client (i.e. iperf3 client logs) and server (iperf3 server). Each logfile starts with the command used to initiate the application.
+
+Filenames follow the convention:
+
+    CM-SM.log
+
+where CM is the client mode and SM is the server mode. 
+
+CM is one of the following:
+
+    bm - bare metal
+    dc - docker container
+
+SM is one of the following:
+
+    lbm - local bare metal, i.e. running natively on the same physical system as the client
+    ldc - docker container, i.e. running in a docker container on the same physical system as the client
+    rbm - remote bare metal, i.e. running natively on a different system (i7-4930k @ 4.3 GHz)
+    rdc - remote docker container, i.e. running in a docker container on a different system (i7-4930k @ 4.3 GHz)
+
+

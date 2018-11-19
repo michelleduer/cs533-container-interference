@@ -1,0 +1,2 @@
+./wrk -d 60s http://192.168.1.135:81/1kb.dat > rawlogs/test3small.log
+
