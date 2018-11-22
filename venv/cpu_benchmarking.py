@@ -277,7 +277,7 @@ if __name__ == '__main__':
     multi_names = multi_tests(img, stress_img, multi_total_tests, name)
 
     print('\nstopping/removing tests...')
-    TODO clean_containers(baseline_names)
+    clean_containers(baseline_names)
     clean_containers(multi_names)
 
     print('\nDone!')
