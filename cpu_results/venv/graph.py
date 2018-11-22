@@ -4,9 +4,7 @@ import matplotlib.pyplot as plt     # visual plotting of data
 import seaborn as sns               # visual plotting of data
 from os import listdir              # work with file directory
 from pandas import pandas as pd     # handling data
-import csv  # create csv's from data
-
-
+import csv                          # create CSVs from data
 
 
 def barplot(filename: str, x_label: str, y_label: str, img_title: str):
