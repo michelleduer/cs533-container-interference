@@ -43,34 +43,58 @@ def parse_tests():
     Parse and graph baseline and other tests
     """
     baseline_gflops = []
+    reduced_gflops = []
+    microservice_gflops = []
     multi_gflops = []
+    lv_ls_gflops = []
 
     files = sorted(listdir('./graph_data/'))
     for f in files:
+        print(f)
         gflop = float(parse_file(f))
         if gflop > 0:
             if 'baseline' in f:
                 baseline_gflops.append(gflop)
+            elif 'reduced' in f:
+                reduced_gflops.append(gflop)
+            elif 'microservice' in f:
+                microservice_gflops.append(gflop)
             elif 'multi' in f:
                 multi_gflops.append(gflop)
+            elif 'lv' in f:
+                lv_ls_gflops.append(gflop)
 
     # Plot barplots
     baseline_legend = ['Lr2', 'L', 'nL', 'L<r2']
-    multi_legend = ['']
+    reduced_legend = ['L<r base', ' L< ', 'L ', ' L<r2 ', 'Lr2 ', ' L<r2', 'nL ', '  L<r2', 'L<r2 ', ' L<', 'L< ']
+    microservice_legend = ['L', 'Lr2']
+    multi_legend = ['L', 'L', 'Lr2', 'Lr2']
+    lv_ls_legend = ['Lr2 base', 'L base', ' L ', '  L ', ' Lr2', '  Lr2', 'L v s', 'Lr2 v s']
 
     print(f'\nBaseline GFlops: {baseline_gflops}')
     filename = 'baseline.csv'
     create_csv(filename, baseline_legend, baseline_gflops)
     barplot(filename, x_label='Baseline Tests', y_label='Average GFlops per 500 Trials', img_title='baseline_tests')
 
+    print(f'\nReduced Linpack GFlops: {reduced_gflops}')
+    filename = 'reduced.csv'
+    create_csv(filename, reduced_legend, reduced_gflops)
+    barplot(filename, x_label='Reduced Linpack Tests', y_label='Average GFlops per 500 Trials', img_title='reduced_tests')
 
-    """
-    # TODO: uncomment to create multi tests
+    print(f'Microservice GFlops: {microservice_gflops}')
+    filename = 'microservice.csv'
+    create_csv(filename, microservice_legend, microservice_gflops)
+    barplot(filename, x_label='Microservice Tests', y_label='Average GFlops per 500 Trials', img_title='microservice_tests')
+
     print(f'Multi-core GFlops: {multi_gflops}')
     filename = 'multi.csv'
     create_csv(filename, multi_legend, multi_gflops)
-    barplot(filename, x_label='Multi-Core Tests', y_label='Average GFlops per 500 Trials', img_title='multi_tests')
-    """
+    barplot(filename, x_label='Multi-Core Container Tests', y_label='Average GFlops per 500 Trials', img_title='multi_tests')
+
+    print(f'Linpack Versus GFlops: {lv_ls_gflops}')
+    filename = 'lv_ls.csv'
+    create_csv(filename, lv_ls_legend, lv_ls_gflops)
+    barplot(filename, x_label='Linpack Versus Tests', y_label='Average GFlops per 500 Trials', img_title='lv_ls_tests')
 
 
 def parse_file(logfile: str) -> float:
