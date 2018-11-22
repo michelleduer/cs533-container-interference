@@ -1,79 +1,78 @@
 #!/usr/bin/env python3
 
 """
-Run the Linpack benchmark for benchmarking the CPU and
-graph the results to demonstrate if there may be any measureable
-container interference across various experiments
+Run the Linpack benchmark for benchmarking the CPU to demonstrate
+if there is measureable container interference across various experiments
 """
 
 from subprocess import PIPE, Popen  # spawn processes with CLI commands
 import pexpect                      # spawn and correspond with child processes
 from threading import Thread as tr  # threading
-import multiprocessing as mp        # parallel computation
 
 
-def multi_tests(img: str, stress_img: str, total_tests: int, test_name: str, total_processes: int=2):
+def multi_tests(img: str, stress_img: str, total_tests: int, test_name: str):
     """
     Tests that run on 2 or more containers
     :param img: a docker linpack image
     :param stress_img: a docker stress image
     :param total_tests: the total number of tests
     :param test_name: the base test name
-    :param total_processes: total number of processes
     :return the names of tests
     """
+    threads = 2
+    jobs = []
     names = []
-    p = mp.Pool(processes=total_processes)
-    #workers = []
-    params = []
 
     for b in range(total_tests):
         if b == 0:
             print(f'{str(b + 1)}: two container (unrestricted): Linpack, Linpack')
-            for i in range(total_processes):
+            for i in range(threads):
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './graph_data/' + name + '.log'
+                thread = tr(target=run_docker(logfile, img, name, False))
+                jobs.append(thread)
                 names.append(name)
-                #workers.append(p.starmap(run_docker, [(logfile, img, name, False)]))
-                param = (logfile, img, name, False)
-                params.append(param)
 
-            p.map_async(run_docker, [params[0], params[1]])
-
-        """ # TODO uncomment once earlier tests are working correctly
-        elif b == 1:
+        if b == 1:
             print(f'{str(b + 1)}: two container (2-cpu): Linpack, Linpack')
-            for i in range(total_processes):
+            for i in range(threads):
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './graph_data/' + name + '.log'
                 if i == 0:
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=0))
                 else:
-u                   thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=2))
+                    thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=2))
+                jobs.append(thread)
                 names.append(name)
-        elif b == 2:
+
+        if b == 2:
             print(f'{str(b + 1)}: two container (unrestricted): Linpack, stress (testing 2-cpu)')
-            for i in range(total_processes):
+            for i in range(threads):
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './graph_data/' + name + '.log'
                 if i == 0:
                     thread = tr(target=run_docker(logfile, img, name, False))
                 elif i == 1:
-                    thread = tr(target=run_docker(logfile, stress_img, name, False, total_pinned_cpu=0, start=0, stress=True))
+                    thread = tr(
+                        target=run_docker(logfile, stress_img, name, False, total_pinned_cpu=0, start=0, stress=True))
+                jobs.append(thread)
                 names.append(name)
-        elif b == 3:
+
+        if b == 3:
             print(f'{str(b + 1)}: two container (2-cpu): Linpack, stress (testing 2-cpu)')
-            for i in range(total_processes):
+            for i in range(threads):
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './graph_data/' + name + '.log'
                 if i == 0:
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=0))
                 elif i == 1:
                     thread = tr(target=run_docker(logfile, stress_img, name, True, total_pinned_cpu=2, start=2, stress=True))
+                jobs.append(thread)
                 names.append(name)
-        elif b == 4:
+
+        if b == 4:
             print(f'{str(b + 1)}: two container (unrestricted): Linpack (<100%), Linpack(100%)')
-            for i in range(total_processes):
+            for i in range(threads):
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './graph_data/' + name + '.log'
                 if i == 0:
@@ -81,10 +80,12 @@ u                   thread = tr(target=run_docker(logfile, img, name, True, tota
                                                   total_equations='500'))
                 elif i == 1:
                     thread = tr(target=run_docker(logfile, img, name, False))
+                jobs.append(thread)
                 names.append(name)
-        elif b == 5:
+
+        if b == 5:
             print(f'{str(b + 1)}: two container (2-cpu): Linpack (<100%), Linpack (100%)')
-            for i in range(total_processes):
+            for i in range(threads):
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './graph_data/' + name + '.log'
                 if i == 0:
@@ -92,25 +93,29 @@ u                   thread = tr(target=run_docker(logfile, img, name, True, tota
                                                   total_equations='500'))
                 elif i == 1:
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=2))
+                jobs.append(thread)
                 names.append(name)
-        else:
+
+        if b == 6:
             print(f'{str(b + 1)}: one container (2-cpu) and native: Linpack (<100%), native (100%)')
-            for i in range(total_processes):
+            for i in range(threads):
                 name = test_name + str(b + 1) + '-' + str(i + 1)
                 logfile = './graph_data/' + name + '.log'
                 if i == 0:
                     thread = tr(target=run_docker(logfile, img, name, True, total_pinned_cpu=2, start=0, stress=False,
                                                   total_equations='500'))
+                    names.append(name)
                 elif i == 1:
                     cmd = './xlinpack_xeon64'
-                    total_equations = '1000'
-                    leading_dimension = '1000'
-                    trials = '50'
-                    alignment_value = '64'
-                    thread = tr(target=benchmark_linpack(logfile, pexpect.spawnu(cmd), total_equations,
-                                                         leading_dimension, trials, alignment_value))
-                names.append(name)
-                """
+                    thread = tr(target=benchmark_linpack(logfile, pexpect.spawnu(cmd), total_equations='1000',
+                                                         leading_dimension='1000', trials='500', alignment_value='64'))
+                jobs.append(thread)
+
+        for j in jobs:
+            j.start()
+        for j in jobs:
+            j.join()
+        jobs.clear()
 
     return names
 
@@ -160,8 +165,8 @@ def baseline_tests(img: str, total_tests: int, test_name: str):
     return names
 
 
-
-def benchmark_linpack(logfile: str, child: pexpect.spawnu, total_equations: int, leading_dimension: int, trials: int, alignment_value: int):
+def benchmark_linpack(logfile: str, child: pexpect.spawnu, total_equations: int, leading_dimension: int, trials: int,
+                      alignment_value: int):
     """
     Set the parameters for Linpack and store the resulting benchmarked measurements into a file
     :param logfile: the file for storing results
@@ -265,16 +270,14 @@ if __name__ == '__main__':
     print(f'\nrunning ' + str(baseline_total_tests) + ' baseline tests...')
     baseline_names = baseline_tests(img, baseline_total_tests, name)
 
-    """
     # Multiple Core Tests
     multi_total_tests = 6
     name = 'multi'
     print(f'\nrunning ' + str(multi_total_tests) + ' multi-container tests...')
     multi_names = multi_tests(img, stress_img, multi_total_tests, name)
-    """
 
     print('\nstopping/removing tests...')
-    clean_containers(baseline_names)  # TODO uncomment
-    #clean_containers(multi_names)
+    TODO clean_containers(baseline_names)
+    clean_containers(multi_names)
 
     print('\nDone!')
