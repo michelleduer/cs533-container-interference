@@ -1,0 +1,4 @@
+Performance Summary (GFlops)
+
+Size   LDA    Align.  Average  Maximal
+500    1000   64      3.2155   6.9354  
