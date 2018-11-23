@@ -29,6 +29,12 @@ def barplot(filename: str, x_label: str, y_label: str, img_title: str):
 
 
 def create_csv(filename: str, header: [str], data: [float]):
+    """
+    Creates CSVs from the data for later use with pandas dataframes
+    :param filename: the new csv filename
+    :param header: the data headers
+    :param data: the data values
+    """
     with open('./csv/' + filename, 'w', newline='') as f:
         wr = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE)
         wr.writerow(header)
