@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt     # visual plotting of data
 import seaborn as sns               # visual plotting of data
 from os import listdir              # work with file directory
-from pandas import pandas as pd     # handling data
+import pandas as pd                 # handling data
 import csv                          # create CSVs from data
 
 
