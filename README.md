@@ -7,3 +7,13 @@ Test the runtime of an application running in a Docker container when applicatio
 
 #### Team Members (alphabetical by first name):
 Dylan Laufenberg, Hannah Galbraith, Michelle Duer, Scott Jones
+
+
+#### CPU
+(Hannah Galbraith, Michelle Duer)
+
+#### Network
+(Dylan Laufenberg)
+
+#### Memory
+(Scott Jones)
