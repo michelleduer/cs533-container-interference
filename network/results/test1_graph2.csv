@@ -1,0 +1,13 @@
+Number of benchmarks,Type,Throughput (Mbps)
+1,Min,940
+1,Median,940
+1,Max,940
+4,Min,234
+4,Median,234
+4,Max,234
+8,Min,117
+8,Median,117
+8,Max,122
+32,Min,26.1
+32,Median,27.75
+32,Max,46.1

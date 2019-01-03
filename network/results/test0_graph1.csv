@@ -1,0 +1,5 @@
+Client,Server,Throughput
+Bare metal,Bare metal,13.2
+Bare metal,Docker,5.12
+Docker,Bare metal,14.6
+Docker,Docker,4.72
