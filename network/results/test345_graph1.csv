@@ -1,0 +1,11 @@
+Test configuration,Download type,Throughput (Mbps)
+Fedora,Total,872.56
+Fedora,Fedora ISO,872.56
+1 KB file,Total,138.24
+1 KB file,1 KB file,138.24
+Shared CPU,Total,827.93
+Shared CPU,Fedora ISO,752.73
+Shared CPU,1 KB file,75.2
+w/ cgroups,Total,835.24
+w/ cgroups,Fedora ISO,748.68
+w/ cgroups,1 KB file,86.56

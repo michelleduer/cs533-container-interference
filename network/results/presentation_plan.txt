@@ -1,0 +1,27 @@
+Discuss hardware limitations (NIC, CPU, RAM)
+
+test0_graph1: Docker has some performance optimizations for sending data, yet introduces a bottleneck at 4 Gbps+ for the iperf3 server.
+
+test0_graph2: Over the Gigabit network, Docker has virtually a very slightly positive impact on iperf3 performance. So we're in good shape to talk about container interference.
+
+test1_graph1: Multiple iperf3 benchmarks compete fairly for bandwidth. They each get about the same bandwidth and achieve the same combined throughput as a single iperf3 instance. We also tried capping 8 iperf3 benchmarks at about 1/8 of the target throughput, and they all reached their bandwidth limits right on the nose. We'll skip those graphs for time.
+
+Next we looked at less artificial benchmarks. We used NGINX, a high-performance web server that excels at serving static files, with the wrk benchmark tool that the NGINX team uses to benchmark their server. We hosted a 1 KB file and a 1.8 GB Fedora ISO in an NGINX Docker container. We used these to benchmark big file downloads and small file downloads.
+
+test3_graph1: First, we benchmarked one download at a time to establish baseline performance. The Fedora ISO download falls short of the 940 Mbits or so that iperf3 achieved, because iperf3 uses huge frames designed for super-high-speed networks. The roughly 875 Mbps that the Fedora ISO download achieves is in the typical range of throughput for transferring files over Gigabit connections with normal data frames.
+
+More interestingly, the 1 KB file download is single-core-CPU-capped, which is what we were afraid we might see on our test system. However, it's also typical for small file downloads to utilize only a small fraction of the available bandwidth in general.
+
+It's important to note that this graph and the two that follow are scaled to the same y-axis for easy comparison.
+
+test4_graph1: Now let's look at two simultaneous downloads served by different Docker containers. When a large file download and a small file download compete for network acces, a few interesting behaviors emerge. The Fedora ISO hogs most of the available bandwidth, cutting the small file server's throughput in half. The combined throughput falls well short of what the Fedora ISO server could utilize on its own, which is our first clear example of network-based container interference.
+
+test5_graph1: We split the CPU cores up between the two servers so that each one has two dedicated cores, and we re-ran the previous test. The small file server performs noticeably better, but it's not a huge difference. The total throughput remains significantly below where it should be.
+
+nginx_latency: Finally, we turn our attention to the other important metric in network performance, which is latency. The small file server, running alone, achieves about 750 microsecond latecy on its downloads. When it must compete with a large file server, its latency doubles. Setting dedicated CPUs helps significantly. However, it's important to note that all of these latency figures are still quite low. The large file server absolutely does not prevent the small file server from accessing the network for long periods of time.
+
+
+Takeaways:
+1. At 1 Gbps, even on a decade-old CPU, Docker itself does not become the bottleneck. At 4+ Gbps on this CPU, it starts to become the limiting factor.
+2. Even without Docker itself as a bottleneck, larger transfers hog bandwidth when the interface is saturated.
+3. Multiple NGINX connections can absolutely interfere with one another. With just 2 NGINX instances, we see the combined throughput drop by about 50 Mbps.

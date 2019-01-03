@@ -1,0 +1,2 @@
+ls ./*.py > makegraphs
+chmod +x makegraphs *.py

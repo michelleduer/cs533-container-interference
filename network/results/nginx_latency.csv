@@ -1,0 +1,4 @@
+Environment,Latency (ms)
+Solo,0.742
+Shared CPU,1.48
+With cgroups,1.28
